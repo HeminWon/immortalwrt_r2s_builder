@@ -64,6 +64,7 @@ jobs:
             -v $PWD/scripts/build.sh:/home/build/immortalwrt/build.sh \
             -v $PWD/shell:/home/build/immortalwrt/shell \
             -v $PWD/custom:/home/build/immortalwrt/custom \
+            -v $PWD/files:/home/build/immortalwrt/files \
             -v $PWD/bin:/home/build/immortalwrt/bin \
             immortalwrt/imagebuilder:rockchip-armv8-openwrt-${{ env.IMMORTALWRT_VERSION }} \
             bash /home/build/immortalwrt/build.sh

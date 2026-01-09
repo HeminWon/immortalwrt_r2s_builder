@@ -88,11 +88,45 @@ echo "=========================================="
 echo "开始构建固件..."
 echo "=========================================="
 
+# 准备自定义配置文件
+if [ -d "files" ]; then
+    echo "检测到自定义配置目录 files/"
+
+    # 动态生成 uci-defaults 脚本，将 ROUTER_IP 写入
+    mkdir -p files/etc/uci-defaults
+    cat > files/etc/uci-defaults/99-custom-lan-ip << EOF
+#!/bin/sh
+# 自定义 LAN IP 地址
+# 该脚本在首次启动时执行，执行后会自动删除
+
+# 设置的 IP 地址（构建时生成）
+ROUTER_IP="${ROUTER_IP}"
+
+# 提取 IP 地址（去除可能的子网掩码）
+ROUTER_IP_ADDR=\$(echo "\$ROUTER_IP" | cut -d'/' -f1)
+
+# 设置 LAN 接口 IP 地址
+uci set network.lan.ipaddr="\${ROUTER_IP_ADDR}"
+uci set network.lan.netmask="255.255.255.0"
+
+# 提交更改
+uci commit network
+
+# 输出日志
+logger -t custom-lan-ip "LAN IP 已设置为: \${ROUTER_IP_ADDR}"
+
+exit 0
+EOF
+    chmod +x files/etc/uci-defaults/99-custom-lan-ip
+    echo "✅ 已生成自定义 LAN IP 配置脚本，目标 IP: ${ROUTER_IP}"
+fi
+
 # 执行构建
 make image \
     PROFILE="${PROFILE}" \
     PACKAGES="${PACKAGES}" \
-    ROOTFS_PARTSIZE="${ROOTFS_PARTSIZE}" || {
+    ROOTFS_PARTSIZE="${ROOTFS_PARTSIZE}" \
+    FILES="files" || {
         echo "构建失败！"
         exit 1
     }
