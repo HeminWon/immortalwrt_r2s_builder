@@ -29,6 +29,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: 检出代码
@@ -88,9 +90,8 @@ jobs:
       - name: 生成 Release
         uses: softprops/action-gh-release@v1
         if: github.event_name != 'pull_request'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: v${{ steps.env.outputs.build_date }}-${{ github.run_number }}
           name: ImmortalWrt ${{ env.IMMORTALWRT_VERSION }} for R2S (${{ steps.env.outputs.build_date }})
           body: |
