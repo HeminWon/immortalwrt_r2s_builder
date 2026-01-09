@@ -28,6 +28,42 @@ else
     echo "⚠️  未找到 shell/custom-packages.sh，将使用默认配置"
 fi
 
+# 处理第三方软件包
+if [ -n "$CUSTOM_PACKAGES" ]; then
+    echo "=========================================="
+    echo "处理第三方软件包..."
+    echo "=========================================="
+
+    # 下载 run 文件仓库
+    echo "🔄 正在克隆第三方软件包仓库..."
+    git clone --depth=1 https://github.com/wukongdaily/store.git /tmp/store-run-repo
+
+    # 拷贝 run/arm64 下所有文件到 extra-packages 目录
+    mkdir -p extra-packages
+    cp -r /tmp/store-run-repo/run/arm64/* extra-packages/
+
+    echo "✅ Run 文件已复制到 extra-packages"
+    ls -lh extra-packages/*.run 2>/dev/null || echo "无 .run 文件"
+
+    # 解压并拷贝 ipk 到 packages 目录
+    sh shell/prepare-packages.sh
+
+    echo "📦 整理后的 IPK 包："
+    ls -lah packages/
+
+    # 添加架构优先级信息（关键步骤）
+    echo "⚙️  配置架构优先级..."
+    sed -i '1i\
+arch aarch64_generic 10\n\
+arch aarch64_cortex-a53 15' repositories.conf
+
+    echo "✅ 已配置本地包优先级"
+    echo "=========================================="
+    echo "repositories.conf 配置："
+    cat repositories.conf
+    echo "=========================================="
+fi
+
 # 构建最终软件包列表
 # CUSTOM_PACKAGES 中已包含移除包（-前缀）和所有自定义包
 PACKAGES=$(echo "${CUSTOM_PACKAGES} luci luci-ssl-openssl" | xargs)

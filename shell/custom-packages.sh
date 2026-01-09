@@ -16,9 +16,7 @@ CUSTOM_PACKAGES="$CUSTOM_PACKAGES dnsmasq-full"
 
 # ============ VPN 和代理（默认启用）============
 # Tailscale 虚拟局域网
-# CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-tailscale"
 # CUSTOM_PACKAGES="$CUSTOM_PACKAGES tailscale"
-# CUSTOM_PACKAGES="$CUSTOM_PACKAGES tailscaled"
 
 # OpenClash 代理工具
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-openclash"
