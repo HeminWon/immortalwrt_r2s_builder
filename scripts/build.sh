@@ -14,26 +14,19 @@ echo "设备 Profile: ${PROFILE}"
 echo "Rootfs 分区大小: ${ROOTFS_PARTSIZE}MB"
 echo "路由器 IP: ${ROUTER_IP}"
 
-# 进入 ImageBuilder 目录
-cd /builder
-
-# 加载自定义配置
-if [ -d "/custom" ]; then
-    echo "正在加载自定义配置..."
-    if [ -f "/custom/packages.txt" ]; then
-        CUSTOM_PACKAGES=$(cat /custom/packages.txt | tr '\n' ' ')
-        echo "自定义软件包: ${CUSTOM_PACKAGES}"
-    fi
+# 加载自定义软件包
+CUSTOM_PACKAGES=""
+if [ -f "/workdir/custom/packages.txt" ]; then
+    echo "正在加载自定义软件包..."
+    # 读取软件包列表，过滤注释和空行
+    CUSTOM_PACKAGES=$(grep -v '^#' /workdir/custom/packages.txt | grep -v '^$' | tr '\n' ' ' | xargs)
+    echo "自定义软件包: ${CUSTOM_PACKAGES}"
 fi
 
 # 默认软件包列表（最小化）
-PACKAGES="luci luci-ssl-openssl"
+PACKAGES="luci luci-ssl-openssl ${CUSTOM_PACKAGES}"
 
-# 添加自定义软件包
-if [ -n "${CUSTOM_PACKAGES}" ]; then
-    PACKAGES="${PACKAGES} ${CUSTOM_PACKAGES}"
-fi
-
+echo "最终软件包列表: ${PACKAGES}"
 echo "=========================================="
 echo "开始构建固件..."
 echo "=========================================="
@@ -42,8 +35,7 @@ echo "=========================================="
 make image \
     PROFILE="${PROFILE}" \
     PACKAGES="${PACKAGES}" \
-    ROOTFS_PARTSIZE="${ROOTFS_PARTSIZE}" \
-    FILES="/custom" || {
+    ROOTFS_PARTSIZE="${ROOTFS_PARTSIZE}" || {
         echo "构建失败！"
         exit 1
     }
@@ -54,7 +46,7 @@ echo "组织输出文件..."
 echo "=========================================="
 
 mkdir -p /workdir/output
-find bin/targets -name "*.img" -exec cp {} /workdir/output/ \;
+find bin/targets -name "*.img*" -type f -exec cp {} /workdir/output/ \;
 
 echo "构建完成！"
 ls -lh /workdir/output/

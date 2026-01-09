@@ -64,7 +64,7 @@ jobs:
             -e ROUTER_IP="${{ steps.env.outputs.router_ip }}" \
             -v $PWD:/workdir \
             -v $PWD/custom:/custom \
-            registry.cn-shanghai.aliyuncs.com/sulinggg/immortalwrt:rockchip-${IMMORTALWRT_VERSION} \
+            immortalwrt/imagebuilder:rockchip-armv8-openwrt-24.10 \
             bash -c "cd /workdir && bash scripts/build.sh"
 
       - name: 组织固件文件
