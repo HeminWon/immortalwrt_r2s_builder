@@ -36,11 +36,16 @@ if [ -n "$CUSTOM_PACKAGES" ]; then
 
     # 下载 run 文件仓库
     echo "🔄 正在克隆第三方软件包仓库..."
-    git clone --depth=1 https://github.com/wukongdaily/store.git /tmp/store-run-repo
+    if ! git clone --depth=1 https://github.com/wukongdaily/store.git /tmp/store-run-repo; then
+        echo "❌ 错误：克隆第三方包仓库失败"
+        exit 1
+    fi
 
     # 拷贝 run/arm64 下所有文件到 extra-packages 目录
     mkdir -p extra-packages
-    cp -r /tmp/store-run-repo/run/arm64/* extra-packages/
+    if ! cp -r /tmp/store-run-repo/run/arm64/* extra-packages/ 2>/dev/null; then
+        echo "⚠️  警告：未找到 run/arm64 目录或目录为空"
+    fi
 
     echo "✅ Run 文件已复制到 extra-packages"
     ls -lh extra-packages/*.run 2>/dev/null || echo "无 .run 文件"
@@ -53,9 +58,13 @@ if [ -n "$CUSTOM_PACKAGES" ]; then
 
     # 添加架构优先级信息（关键步骤）
     echo "⚙️  配置架构优先级..."
-    sed -i '1i\
-arch aarch64_generic 10\n\
-arch aarch64_cortex-a53 15' repositories.conf
+    cat > repositories_prefix.conf << 'EOF'
+arch aarch64_generic 10
+arch aarch64_cortex-a53 15
+EOF
+    cat repositories_prefix.conf repositories.conf > repositories.conf.tmp
+    mv repositories.conf.tmp repositories.conf
+    rm repositories_prefix.conf
 
     echo "✅ 已配置本地包优先级"
     echo "=========================================="

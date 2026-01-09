@@ -1,0 +1,36 @@
+name: ShellCheck
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/**'
+      - 'shell/**'
+      - '.github/workflows/shellcheck.yml'
+  pull_request:
+    paths:
+      - 'scripts/**'
+      - 'shell/**'
+      - '.github/workflows/shellcheck.yml'
+
+jobs:
+  shellcheck:
+    name: Shell 脚本静态检查
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 运行 ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './scripts ./shell'
+          severity: warning
+          ignore_paths: '*.md'
+          ignore_names: 'SC2086'
+          additional_files: 'build.sh custom-packages.sh prepare-packages.sh'
+
+      - name: 检查结果
+        run: echo "✅ Shell 脚本静态检查通过"

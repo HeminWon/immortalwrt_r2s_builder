@@ -51,9 +51,6 @@ jobs:
           echo "rootfs_size=${ROOTFS_SIZE}" >> $GITHUB_OUTPUT
           echo "build_date=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
 
-          mkdir -p custom
-          echo "${ROUTER_IP}" > custom/router_ip.txt
-
       - name: 准备构建脚本
         run: |
           chmod +x scripts/build.sh

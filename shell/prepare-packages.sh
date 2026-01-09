@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 # 解压并整理第三方 IPK 包到 packages/ 目录
 
 BASE_DIR="extra-packages"
