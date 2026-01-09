@@ -58,7 +58,7 @@ jobs:
 
       - name: 执行构建
         run: |
-          docker run --rm \
+          docker run --rm --user root \
             -e PROFILE="${DEVICE_PROFILE}" \
             -e ROOTFS_PARTSIZE="${{ steps.env.outputs.rootfs_size }}" \
             -e ROUTER_IP="${{ steps.env.outputs.router_ip }}" \
