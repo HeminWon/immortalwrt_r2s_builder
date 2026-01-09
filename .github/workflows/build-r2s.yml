@@ -1,0 +1,109 @@
+name: Build ImmortalWrt for NanoPi R2S
+
+on:
+  workflow_dispatch:
+    inputs:
+      router_ip:
+        description: '路由器 IP 地址'
+        required: false
+        default: '192.168.1.1'
+        type: string
+      rootfs_size:
+        description: 'Rootfs 分区大小 (MB)'
+        required: false
+        default: '1024'
+        type: string
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/build-r2s.yml'
+      - 'scripts/**'
+      - 'custom/**'
+
+env:
+  IMMORTALWRT_VERSION: '24.10.4'
+  DEVICE_PROFILE: 'friendlyarm_nanopi-r2s'
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 初始化构建环境
+        run: |
+          echo "开始构建 ImmortalWrt ${IMMORTALWRT_VERSION} for NanoPi R2S"
+          sudo timedatectl set-timezone "$TZ"
+
+      - name: 设置构建参数
+        id: env
+        run: |
+          ROUTER_IP="${{ github.event.inputs.router_ip || '192.168.1.1' }}"
+          ROOTFS_SIZE="${{ github.event.inputs.rootfs_size || '1024' }}"
+
+          echo "router_ip=${ROUTER_IP}" >> $GITHUB_OUTPUT
+          echo "rootfs_size=${ROOTFS_SIZE}" >> $GITHUB_OUTPUT
+          echo "build_date=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+
+          mkdir -p custom
+          echo "${ROUTER_IP}" > custom/router_ip.txt
+
+      - name: 准备构建脚本
+        run: |
+          chmod +x scripts/build.sh
+
+      - name: 执行构建
+        run: |
+          docker run --rm \
+            -e PROFILE="${DEVICE_PROFILE}" \
+            -e ROOTFS_PARTSIZE="${{ steps.env.outputs.rootfs_size }}" \
+            -e ROUTER_IP="${{ steps.env.outputs.router_ip }}" \
+            -v $PWD:/workdir \
+            -v $PWD/custom:/custom \
+            registry.cn-shanghai.aliyuncs.com/sulinggg/immortalwrt:rockchip-${IMMORTALWRT_VERSION} \
+            bash -c "cd /workdir && bash scripts/build.sh"
+
+      - name: 组织固件文件
+        id: organize
+        run: |
+          cd output
+          gzip *.img
+          echo "firmware_path=$PWD" >> $GITHUB_OUTPUT
+          ls -lh
+
+      - name: 上传固件到 Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ImmortalWrt-${{ env.IMMORTALWRT_VERSION }}-R2S-${{ steps.env.outputs.build_date }}
+          path: output/*.img.gz
+
+      - name: 生成 Release
+        uses: softprops/action-gh-release@v1
+        if: github.event_name != 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.env.outputs.build_date }}-${{ github.run_number }}
+          name: ImmortalWrt ${{ env.IMMORTALWRT_VERSION }} for R2S (${{ steps.env.outputs.build_date }})
+          body: |
+            ### ImmortalWrt 固件信息
+
+            - **设备**: NanoPi R2S
+            - **版本**: ${{ env.IMMORTALWRT_VERSION }}
+            - **构建时间**: ${{ steps.env.outputs.build_date }}
+            - **路由器 IP**: ${{ steps.env.outputs.router_ip }}
+            - **Rootfs 大小**: ${{ steps.env.outputs.rootfs_size }}MB
+
+            ### 使用说明
+
+            1. 下载固件文件（.img.gz）
+            2. 解压得到 .img 文件
+            3. 使用工具（如 balenaEtcher、Rufus）将镜像写入 SD 卡或 U 盘
+            4. 将存储设备插入 R2S，上电启动
+            5. 默认管理地址: http://${{ steps.env.outputs.router_ip }}
+            6. 默认用户名: root，默认密码: password
+          files: output/*.img.gz

@@ -1,0 +1,12 @@
+# 构建输出
+output/
+*.img
+*.img.gz
+
+# 临时文件
+custom/router_ip.txt
+
+# 系统文件
+.DS_Store
+*~
+*.swp

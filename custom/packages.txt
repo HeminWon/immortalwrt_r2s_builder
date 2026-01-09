@@ -1,0 +1,17 @@
+# 自定义软件包列表
+# 每行一个软件包名称
+# 使用 - 前缀表示移除软件包
+
+# 基础工具
+htop
+wget-ssl
+curl
+
+# 网络工具
+iperf3
+tcpdump
+
+# 常用插件（可选，按需取消注释）
+# luci-app-uhttpd
+# luci-app-ttyd
+# luci-app-upnp
