@@ -18,7 +18,8 @@ CUSTOM_PACKAGES="$CUSTOM_PACKAGES dnsmasq-full"
 # Tailscale 虚拟局域网
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES tailscale"
 
-# OpenClash 代理工具
+# OpenClash 代理工具（需要 luci-compat 提供 CBI 框架支持）
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-compat"
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-openclash"
 
 # ============ 基础工具（默认启用）============
