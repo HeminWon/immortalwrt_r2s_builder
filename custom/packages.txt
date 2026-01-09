@@ -11,6 +11,14 @@ curl
 iperf3
 tcpdump
 
+# VPN 和代理
+luci-app-tailscale
+tailscale
+tailscaled
+
+# OpenClash（需要从第三方源安装）
+# luci-app-openclash
+
 # 常用插件（可选，按需取消注释）
 # luci-app-uhttpd
 # luci-app-ttyd

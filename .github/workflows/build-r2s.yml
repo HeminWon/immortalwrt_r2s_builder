@@ -6,7 +6,7 @@ on:
       router_ip:
         description: '路由器 IP 地址'
         required: false
-        default: '192.168.1.1'
+        default: '192.168.2.1'
         type: string
       rootfs_size:
         description: 'Rootfs 分区大小 (MB)'
@@ -44,7 +44,7 @@ jobs:
       - name: 设置构建参数
         id: env
         run: |
-          ROUTER_IP="${{ github.event.inputs.router_ip || '192.168.1.1' }}"
+          ROUTER_IP="${{ github.event.inputs.router_ip || '192.168.2.1' }}"
           ROOTFS_SIZE="${{ github.event.inputs.rootfs_size || '1024' }}"
 
           echo "router_ip=${ROUTER_IP}" >> $GITHUB_OUTPUT
@@ -88,7 +88,7 @@ jobs:
           path: output/*.img.gz
 
       - name: 生成 Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: github.event_name != 'pull_request'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
