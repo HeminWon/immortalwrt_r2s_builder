@@ -28,6 +28,16 @@ PACKAGES="luci luci-ssl-openssl ${CUSTOM_PACKAGES}"
 
 echo "最终软件包列表: ${PACKAGES}"
 echo "=========================================="
+echo "初始化 ImageBuilder..."
+echo "=========================================="
+
+# OpenWrt/ImmortalWrt 24.10+ 需要先运行 setup.sh
+if [ -f "./setup.sh" ]; then
+    echo "运行 setup.sh 初始化..."
+    ./setup.sh
+fi
+
+echo "=========================================="
 echo "开始构建固件..."
 echo "=========================================="
 
