@@ -17,32 +17,28 @@ echo "路由器 IP: ${ROUTER_IP}"
 # 切换到 ImageBuilder 工作目录
 cd /home/build/immortalwrt
 
-# 加载自定义软件包
-REMOVE_PACKAGES=""
-ADD_PACKAGES=""
+# 加载自定义软件包配置
+CUSTOM_PACKAGES=""
 
-if [ -f "custom/packages.txt" ]; then
-    echo "正在加载自定义软件包..."
-
-    # 分离移除包（-开头）和普通包
-    # 关键：移除指令必须在依赖链之前，避免包冲突
-    REMOVE_PACKAGES=$(grep -v '^#' custom/packages.txt | grep -v '^$' | grep '^-' | tr '\n' ' ')
-    ADD_PACKAGES=$(grep -v '^#' custom/packages.txt | grep -v '^$' | grep -v '^-' | tr '\n' ' ')
-
-    echo "移除的软件包: ${REMOVE_PACKAGES:-无}"
-    echo "添加的软件包: ${ADD_PACKAGES:-无}"
+if [ -f "shell/custom-packages.sh" ]; then
+    echo "正在加载自定义软件包配置..."
+    source shell/custom-packages.sh
+    echo "自定义软件包: ${CUSTOM_PACKAGES:-无}"
+else
+    echo "⚠️  未找到 shell/custom-packages.sh，将使用默认配置"
 fi
 
 # 构建最终软件包列表
-# 移除包在最前面 → 自定义包 → 基础包
-PACKAGES=$(echo "${REMOVE_PACKAGES} ${ADD_PACKAGES} luci luci-ssl-openssl" | xargs)
+# CUSTOM_PACKAGES 中已包含移除包（-前缀）和所有自定义包
+PACKAGES=$(echo "${CUSTOM_PACKAGES} luci luci-ssl-openssl" | xargs)
 
+echo "=========================================="
 echo "最终软件包列表: ${PACKAGES}"
 echo "=========================================="
 echo "软件包处理说明："
-echo "  - 移除包（-前缀）优先处理，避免依赖冲突"
-echo "  - 自定义包按 packages.txt 顺序添加"
-echo "  - 基础包（luci, luci-ssl-openssl）放在最后"
+echo "  - 移除包（-前缀）会在 ImageBuilder 中自动处理"
+echo "  - 自定义包通过 shell/custom-packages.sh 配置"
+echo "  - 基础包（luci, luci-ssl-openssl）默认包含"
 echo "=========================================="
 echo "开始构建固件..."
 echo "=========================================="

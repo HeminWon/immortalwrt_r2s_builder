@@ -28,7 +28,7 @@
 修改以下文件并推送到 `main` 分支将自动触发构建：
 - `.github/workflows/build-r2s.yml`
 - `scripts/build.sh`
-- `custom/packages.txt`
+- `shell/custom-packages.sh`
 
 ## 目录结构
 
@@ -39,8 +39,9 @@
 │       └── build-r2s.yml          # GitHub Actions 工作流配置
 ├── scripts/
 │   └── build.sh                   # 核心构建脚本
+├── shell/
+│   └── custom-packages.sh         # 自定义软件包配置（bash 脚本）
 ├── custom/
-│   ├── packages.txt               # 自定义软件包列表
 │   └── router_ip.txt              # 自动生成的路由器 IP（构建时）
 └── output/                        # 构建输出目录（自动生成）
 ```
@@ -49,22 +50,35 @@
 
 ### 修改软件包
 
-编辑 `custom/packages.txt` 文件：
+编辑 `shell/custom-packages.sh` 文件：
 
 ```bash
-# 添加软件包
-htop
-curl
-iperf3
+# 默认启用的包
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-tailscale"
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES htop"
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES curl"
 
-# 移除软件包（使用 - 前缀）
--dnsmasq
+# 可选包（需要时取消注释）
+#CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-ttyd"
+#CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-upnp"
+
+# 移除包（使用 - 前缀）
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES -dnsmasq"
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES dnsmasq-full"
 ```
 
-常用软件包参考：
+**重要说明**：
+- 使用变量拼接格式：`CUSTOM_PACKAGES="$CUSTOM_PACKAGES 包名"`
+- Tailscale VPN 默认已启用
+- R2S 闪存空间有限，建议仅安装必需软件包
+- 支持在 workflow 中动态追加包
+
+**常用软件包参考**：
 - `luci-app-ttyd` - 终端工具
 - `luci-app-upnp` - UPnP 支持
 - `luci-app-uhttpd` - HTTP 服务器配置
+- `luci-app-adguardhome` - AdGuard Home 去广告
+- `luci-app-mosdns` - MosDNS DNS 分流
 - `iperf3` - 网络性能测试
 - `tcpdump` - 网络抓包工具
 
@@ -142,8 +156,9 @@ registry.cn-shanghai.aliyuncs.com/sulinggg/immortalwrt:rockchip-24.10.4
 ### 构建失败
 
 1. 检查 Actions 日志中的错误信息
-2. 验证 `custom/packages.txt` 中的软件包名称是否正确
+2. 验证 `shell/custom-packages.sh` 中的软件包名称是否正确
 3. 确保 Docker 镜像版本与 ImmortalWrt 版本匹配
+4. 检查 bash 脚本语法：`bash -n shell/custom-packages.sh`
 
 ### 固件无法启动
 

@@ -19,7 +19,7 @@ on:
     paths:
       - '.github/workflows/build-r2s.yml'
       - 'scripts/**'
-      - 'custom/**'
+      - 'shell/**'
 
 env:
   IMMORTALWRT_VERSION: '24.10.4'
@@ -65,6 +65,7 @@ jobs:
             -e ROOTFS_PARTSIZE="${{ steps.env.outputs.rootfs_size }}" \
             -e ROUTER_IP="${{ steps.env.outputs.router_ip }}" \
             -v $PWD/scripts/build.sh:/home/build/immortalwrt/build.sh \
+            -v $PWD/shell:/home/build/immortalwrt/shell \
             -v $PWD/custom:/home/build/immortalwrt/custom \
             -v $PWD/bin:/home/build/immortalwrt/bin \
             immortalwrt/imagebuilder:rockchip-armv8-openwrt-${{ env.IMMORTALWRT_VERSION }} \
