@@ -10,6 +10,7 @@
 - ✅ 最小化配置，易于理解和定制
 - ✅ 自动生成 Release 和 Artifacts
 - ✅ 支持自定义软件包列表
+- ✅ 支持第三方 IPK 包集成
 
 ## 快速开始
 
@@ -19,7 +20,7 @@
 2. 选择 **Build ImmortalWrt for NanoPi R2S** workflow
 3. 点击 **Run workflow** 按钮
 4. 可选配置参数：
-   - **路由器 IP 地址**: 默认 `192.168.1.1`
+   - **路由器 IP 地址**: 默认 `192.168.2.1`
    - **Rootfs 分区大小**: 默认 `1024` MB
 5. 等待构建完成（约 10-20 分钟）
 
@@ -40,7 +41,8 @@
 ├── scripts/
 │   └── build.sh                   # 核心构建脚本
 ├── shell/
-│   └── custom-packages.sh         # 自定义软件包配置（bash 脚本）
+│   ├── custom-packages.sh         # 自定义软件包配置（bash 脚本）
+│   └── prepare-packages.sh        # 第三方 IPK 包处理脚本
 ├── custom/
 │   └── router_ip.txt              # 自动生成的路由器 IP（构建时）
 └── output/                        # 构建输出目录（自动生成）
@@ -54,13 +56,14 @@
 
 ```bash
 # 默认启用的包
-CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-tailscale"
-CUSTOM_PACKAGES="$CUSTOM_PACKAGES htop"
-CUSTOM_PACKAGES="$CUSTOM_PACKAGES curl"
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-openclash"   # OpenClash 代理工具
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES tailscale"            # Tailscale VPN
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES htop"                 # 系统监控
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES wget-ssl curl"        # 下载工具
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES iperf3 tcpdump"       # 网络工具
 
 # 可选包（需要时取消注释）
 #CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-ttyd"
-#CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-upnp"
 
 # 移除包（使用 - 前缀）
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES -dnsmasq"
@@ -69,7 +72,7 @@ CUSTOM_PACKAGES="$CUSTOM_PACKAGES dnsmasq-full"
 
 **重要说明**：
 - 使用变量拼接格式：`CUSTOM_PACKAGES="$CUSTOM_PACKAGES 包名"`
-- Tailscale VPN 默认已启用
+- 默认包含 OpenClash、Tailscale VPN 和常用网络工具
 - R2S 闪存空间有限，建议仅安装必需软件包
 - 支持在 workflow 中动态追加包
 
@@ -81,6 +84,17 @@ CUSTOM_PACKAGES="$CUSTOM_PACKAGES dnsmasq-full"
 - `luci-app-mosdns` - MosDNS DNS 分流
 - `iperf3` - 网络性能测试
 - `tcpdump` - 网络抓包工具
+
+### 第三方 IPK 包支持
+
+构建系统会自动从 [wukongdaily/store](https://github.com/wukongdaily/store) 仓库获取第三方 IPK 包。这些包会在构建时自动集成到固件中。
+
+**包来源**:
+- 自动克隆 `run/arm64` 目录下的包
+- 支持 `.run` 格式和 `.ipk` 格式
+- 架构优先级: `aarch64_cortex-a53` > `aarch64_generic`
+
+无需额外配置，构建时自动处理。
 
 ### 修改构建参数
 
@@ -123,7 +137,7 @@ sync
 
 ## 默认配置
 
-- **管理地址**: http://192.168.1.1（可在构建时自定义）
+- **管理地址**: http://192.168.2.1（可在构建时自定义）
 - **用户名**: root
 - **密码**: password
 - **SSH**: 端口 22，使用 root 登录
@@ -169,7 +183,7 @@ registry.cn-shanghai.aliyuncs.com/sulinggg/immortalwrt:rockchip-24.10.4
 ### 无法访问管理界面
 
 1. 检查网络连接
-2. 确认 IP 地址配置（默认 192.168.1.1）
+2. 确认 IP 地址配置（默认 192.168.2.1）
 3. 尝试使用 SSH 连接调试
 
 ## 参考资源

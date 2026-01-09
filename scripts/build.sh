@@ -8,7 +8,7 @@ echo "=========================================="
 # 环境变量
 PROFILE="${PROFILE:-friendlyarm_nanopi-r2s}"
 ROOTFS_PARTSIZE="${ROOTFS_PARTSIZE:-1024}"
-ROUTER_IP="${ROUTER_IP:-192.168.1.1}"
+ROUTER_IP="${ROUTER_IP:-192.168.2.1}"
 
 echo "设备 Profile: ${PROFILE}"
 echo "Rootfs 分区大小: ${ROOTFS_PARTSIZE}MB"

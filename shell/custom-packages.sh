@@ -16,7 +16,7 @@ CUSTOM_PACKAGES="$CUSTOM_PACKAGES dnsmasq-full"
 
 # ============ VPN 和代理（默认启用）============
 # Tailscale 虚拟局域网
-# CUSTOM_PACKAGES="$CUSTOM_PACKAGES tailscale"
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES tailscale"
 
 # OpenClash 代理工具
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-openclash"
@@ -38,7 +38,7 @@ CUSTOM_PACKAGES="$CUSTOM_PACKAGES tcpdump"
 
 # ==========================================
 # 注意事项：
-# 1. Tailscale 组件已默认启用
+# 1. Tailscale VPN 已默认启用
 # 2. R2S 闪存空间有限，过多软件包可能导致构建失败
 # 3. 若需移除已有包，使用 -包名 格式
 # 4. 修改后需推送到 main 分支或手动触发构建
