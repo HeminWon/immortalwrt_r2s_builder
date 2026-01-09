@@ -59,7 +59,6 @@ jobs:
       - name: 执行构建
         run: |
           docker run --rm \
-            --user $(id -u):$(id -g) \
             -e PROFILE="${DEVICE_PROFILE}" \
             -e ROOTFS_PARTSIZE="${{ steps.env.outputs.rootfs_size }}" \
             -e ROUTER_IP="${{ steps.env.outputs.router_ip }}" \
@@ -68,6 +67,9 @@ jobs:
             -v $PWD/bin:/home/build/immortalwrt/bin \
             immortalwrt/imagebuilder:rockchip-armv8-openwrt-${{ env.IMMORTALWRT_VERSION }} \
             bash /home/build/immortalwrt/build.sh
+
+          # 修复输出文件权限
+          sudo chown -R $(id -u):$(id -g) bin/
 
       - name: 组织固件文件
         id: organize
