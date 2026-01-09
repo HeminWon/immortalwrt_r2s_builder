@@ -2,6 +2,10 @@
 # 每行一个软件包名称
 # 使用 - 前缀表示移除软件包
 
+# 解决软件包冲突
+-dnsmasq
+dnsmasq-full
+
 # 基础工具
 htop
 wget-ssl
