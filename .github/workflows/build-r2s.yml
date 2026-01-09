@@ -55,27 +55,27 @@ jobs:
       - name: 准备构建脚本
         run: |
           chmod +x scripts/build.sh
-          mkdir -p output
 
       - name: 执行构建
         run: |
           docker run --rm \
+            --user $(id -u):$(id -g) \
             -e PROFILE="${DEVICE_PROFILE}" \
             -e ROOTFS_PARTSIZE="${{ steps.env.outputs.rootfs_size }}" \
             -e ROUTER_IP="${{ steps.env.outputs.router_ip }}" \
             -v $PWD/scripts/build.sh:/home/build/immortalwrt/build.sh \
             -v $PWD/custom:/home/build/immortalwrt/custom \
-            -v $PWD/output:/home/build/immortalwrt/output \
+            -v $PWD/bin:/home/build/immortalwrt/bin \
             immortalwrt/imagebuilder:rockchip-armv8-openwrt-${{ env.IMMORTALWRT_VERSION }} \
             bash /home/build/immortalwrt/build.sh
 
       - name: 组织固件文件
         id: organize
         run: |
-          cd output
-          gzip *.img
-          echo "firmware_path=$PWD" >> $GITHUB_OUTPUT
-          ls -lh
+          mkdir -p output
+          find bin/targets -name "*.img.gz" -type f -exec cp {} output/ \;
+          echo "firmware_path=$PWD/output" >> $GITHUB_OUTPUT
+          ls -lh output/
 
       - name: 上传固件到 Artifacts
         uses: actions/upload-artifact@v4

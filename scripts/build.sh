@@ -43,13 +43,8 @@ make image \
         exit 1
     }
 
-# 复制输出文件
 echo "=========================================="
-echo "组织输出文件..."
-echo "=========================================="
-
-mkdir -p output
-find bin/targets -name "*.img*" -type f -exec cp {} output/ \;
-
 echo "构建完成！"
-ls -lh output/
+echo "=========================================="
+
+ls -lh bin/targets/*/*/
