@@ -14,12 +14,15 @@ echo "设备 Profile: ${PROFILE}"
 echo "Rootfs 分区大小: ${ROOTFS_PARTSIZE}MB"
 echo "路由器 IP: ${ROUTER_IP}"
 
+# 切换到 ImageBuilder 工作目录
+cd /home/build/immortalwrt
+
 # 加载自定义软件包
 CUSTOM_PACKAGES=""
-if [ -f "/workdir/custom/packages.txt" ]; then
+if [ -f "custom/packages.txt" ]; then
     echo "正在加载自定义软件包..."
     # 读取软件包列表，过滤注释和空行
-    CUSTOM_PACKAGES=$(grep -v '^#' /workdir/custom/packages.txt | grep -v '^$' | tr '\n' ' ' | xargs)
+    CUSTOM_PACKAGES=$(grep -v '^#' custom/packages.txt | grep -v '^$' | tr '\n' ' ' | xargs)
     echo "自定义软件包: ${CUSTOM_PACKAGES}"
 fi
 
@@ -27,16 +30,6 @@ fi
 PACKAGES="luci luci-ssl-openssl ${CUSTOM_PACKAGES}"
 
 echo "最终软件包列表: ${PACKAGES}"
-echo "=========================================="
-echo "初始化 ImageBuilder..."
-echo "=========================================="
-
-# OpenWrt/ImmortalWrt 24.10+ 需要先运行 setup.sh
-if [ -f "./setup.sh" ]; then
-    echo "运行 setup.sh 初始化..."
-    ./setup.sh
-fi
-
 echo "=========================================="
 echo "开始构建固件..."
 echo "=========================================="
@@ -55,8 +48,8 @@ echo "=========================================="
 echo "组织输出文件..."
 echo "=========================================="
 
-mkdir -p /workdir/output
-find bin/targets -name "*.img*" -type f -exec cp {} /workdir/output/ \;
+mkdir -p output
+find bin/targets -name "*.img*" -type f -exec cp {} output/ \;
 
 echo "构建完成！"
-ls -lh /workdir/output/
+ls -lh output/

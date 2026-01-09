@@ -55,6 +55,7 @@ jobs:
       - name: 准备构建脚本
         run: |
           chmod +x scripts/build.sh
+          mkdir -p output
 
       - name: 执行构建
         run: |
@@ -62,10 +63,11 @@ jobs:
             -e PROFILE="${DEVICE_PROFILE}" \
             -e ROOTFS_PARTSIZE="${{ steps.env.outputs.rootfs_size }}" \
             -e ROUTER_IP="${{ steps.env.outputs.router_ip }}" \
-            -v $PWD:/workdir \
-            -v $PWD/custom:/custom \
-            immortalwrt/imagebuilder:rockchip-armv8-openwrt-24.10 \
-            bash -c "cd /workdir && bash scripts/build.sh"
+            -v $PWD/scripts/build.sh:/home/build/immortalwrt/build.sh \
+            -v $PWD/custom:/home/build/immortalwrt/custom \
+            -v $PWD/output:/home/build/immortalwrt/output \
+            immortalwrt/imagebuilder:rockchip-armv8-openwrt-${{ env.IMMORTALWRT_VERSION }} \
+            bash /home/build/immortalwrt/build.sh
 
       - name: 组织固件文件
         id: organize
